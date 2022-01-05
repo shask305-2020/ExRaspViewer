@@ -1,6 +1,6 @@
 ﻿namespace ExRaspViewer
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         /// Обязательная переменная конструктора.
@@ -36,7 +36,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1584, 807);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "Планировщик расписания";
             this.ResumeLayout(false);
 
         }
