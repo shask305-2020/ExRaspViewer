@@ -1,0 +1,10 @@
+﻿CREATE OR ALTER PROC [dbo].[pr_LoadPrepod]
+AS
+BEGIN
+	SELECT [IDP], [FAMIO] FROM [SPPREP] WHERE
+	([FAMIO] NOT LIKE (N'Ком%'))
+	AND ([FAMIO] NOT LIKE (N'Предприятие%'))
+	AND ([FAMIO] NOT LIKE (N'Вак%'))
+	AND ([FAMIO] NOT LIKE (N'Сам%'))
+	ORDER BY [FAMIO];
+END

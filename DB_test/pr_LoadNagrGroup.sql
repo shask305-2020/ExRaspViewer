@@ -1,0 +1,15 @@
+﻿CREATE OR ALTER PROC [dbo].[pr_LoadNagrGroup]
+@IDG NVARCHAR(50)
+AS
+BEGIN
+	SELECT PREP.[FAMIO] AS 'Преподаватель', PRED.[NAIM] AS 'Дисциплина', NAGR.[IDGG] AS 'П/г', [CHSEM] AS 'Час. в сем.' 
+	FROM [dbo].[SPNAGR] AS NAGR
+	INNER JOIN
+	[dbo].[SPPREP] AS PREP
+	ON NAGR.IDP = PREP.IDP
+	INNER JOIN
+	[dbo].[SPPRED] AS PRED
+	ON NAGR.IDD = PRED.IDD
+	WHERE NAGR.[IDG] = @IDG
+	ORDER BY PREP.[FAMIO];
+END

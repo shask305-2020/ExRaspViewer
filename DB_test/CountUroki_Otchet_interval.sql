@@ -1,0 +1,15 @@
+﻿CREATE PROCEDURE [dbo].[CountUroki_Otchet_interval]
+@IDP INT,
+@IDG INT,
+@IDD INT,
+@DAT_N DATE,
+@DAT_K DATE
+AS
+BEGIN
+	SELECT COUNT(*) FROM [UROKI] 
+	WHERE IDP = @IDP 
+	AND IDG = @IDG 
+	AND IDD = @IDD 
+	AND DAT >= @DAT_N 
+	AND DAT <= @DAT_K;
+END
