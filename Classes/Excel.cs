@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Data;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using NSExcel = Microsoft.Office.Interop.Excel;
 
@@ -13,12 +9,12 @@ namespace ExRaspViewer.Classes
     {
         public static NSExcel.Application AppExcel = new NSExcel.Application();
 
-        public static void exportToExcel(this DataTable DataTable, string ExcelFilePath = null)
+        public static void ExportToExcel(this DataTable DataTable, string ExcelFilePath = null)
         {
             try
             {
-                int ColumnsCount;   //Количество столбцов
-                if (DataTable == null || (ColumnsCount = DataTable.Columns.Count) == 0)
+                int ColumnsCount = DataTable.Columns.Count;   //Количество столбцов
+                if (DataTable == null || ColumnsCount == 0)
                     throw new Exception("Экспорт в файл Excel: несуществующая или пустая входная таблица!\n");
 
                 AppExcel.Workbooks.Add();   //Добавление рабочей книги
@@ -31,10 +27,11 @@ namespace ExRaspViewer.Classes
                 NSExcel.Range HeaderRange = Worksheet.get_Range((NSExcel.Range)(Worksheet.Cells[1, 1]), (NSExcel.Range)(Worksheet.Cells[1, ColumnsCount]));
                 HeaderRange.Value = Header; //Заполнние первой строки заголовками столбцов
                 
-                HeaderRange.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightGray);  //Перекраса строки с заголовками
+                HeaderRange.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightGray);  //Перекраска строки с заголовками
                 HeaderRange.Font.Bold = true;   //Установление полужирного начертания для строки заголовков
                 int RowsCount = DataTable.Rows.Count;   //Получеие количства строк
                 
+                //Массив для хранения данных
                 object[,] Cells = new object[RowsCount, ColumnsCount];
 
                 //Заполнение двумерного массива данными из ячеек DataTable
@@ -56,7 +53,7 @@ namespace ExRaspViewer.Classes
                     }
                     catch (Exception ex)
                     {
-                        throw new Exception("Экспорт в файл Excel: Не удалось сохранить файл! Проверьте путь к файлу.\n"
+                        throw new Exception("Экспорт в файл Excel: Не удалось сохранить файл!\nПроверьте путь к файлу.\n"
                             + ex.Message);
                     }
                 }

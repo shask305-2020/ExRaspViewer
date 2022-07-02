@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using ExRaspViewer.Classes;
+using System;
 using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using ExRaspViewer.Classes;
-using System.Data.SqlClient;
 using NSExcel = Microsoft.Office.Interop.Excel;
 
 namespace ExRaspViewer
@@ -16,12 +9,16 @@ namespace ExRaspViewer
     public partial class Otchet : Form
     {
         private ClassSqlDB data = new ClassSqlDB();
-        
+        private Timer timer = new Timer();
+        private int iteration = 0;
+        private SaveFileDialog saveFileDialog = new SaveFileDialog();
 
         public Otchet()
         {
             InitializeComponent();
             radioButton2.Checked = true;
+            timer.Tick += Timer_Tick;
+            timer.Interval = 700;
         }
 
         private void Otchet_Load(object sender, EventArgs e)
@@ -29,7 +26,6 @@ namespace ExRaspViewer
             LoadMonth();
             LoadPrepod();
             LoadDataNagrPrepod();
-            //toolStatus.Text = exApp.ActiveSheet;
         }
 
         //Загрузка месяцев
@@ -111,7 +107,6 @@ namespace ExRaspViewer
         {
             txTeacher.Text = listBox1.Text;
             LoadDataNagrPrepod();
-            //CurrentHoursPrepod();
         }
 
         //Работа с интервалами
@@ -155,46 +150,28 @@ namespace ExRaspViewer
         }
 
         //Экспорт в Excel
-        private void button2_Click(object sender, EventArgs e)
-        {
-            NSExcel.Application exApp = new NSExcel.Application();
-            exApp.Workbooks.Add();
-            NSExcel.Worksheet worksheet = (NSExcel.Worksheet)exApp.ActiveSheet;
-            
-            int i, j;
-            string teacher = txTeacher.Text;
-            worksheet.Cells[1, 2] = teacher;
-            for (i = 0; i < dataGridView1.RowCount; i++)
-            {
-                for (j = 0; j < dataGridView1.ColumnCount - 3; j++)
-                {
-                    if (i < 1)
-                        worksheet.Cells[2, j + 1] = dataGridView1.Columns[j+3].HeaderText.ToString();
-                    worksheet.Cells[i+3, j+1] = dataGridView1[j+3, i].Value.ToString();
-                }
-            }
-            exApp.Visible = true;
+        private void button4_Click(object sender, EventArgs e)
+        {            
+            saveFileDialog.InitialDirectory = "c:\\";
+            saveFileDialog.Filter = "Excel files (*.xlsx)|*.xlsx|Excel 2003 (*.xls)|*.xls";
+            saveFileDialog.FilterIndex = 1;
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                timer.Start();
         }
 
-        //Сохранение данных в файл
-        private void button3_Click(object sender, EventArgs e)
+        private void Timer_Tick(object sender, EventArgs e)
         {
-            
-            try
+            listBox1.SelectedIndex = iteration;
+            string pedagog = txTeacher.Text;
+            DataTable dt = ExportToExcel.DataGridView_To_Datatable(dataGridView1);
+            dt.Export(pedagog);
+            iteration++;
+            if (iteration >= listBox1.Items.Count)
             {
-                SaveFileDialog saveFileDialog = new SaveFileDialog();
-                saveFileDialog.InitialDirectory = "c:\\";
-                saveFileDialog.Filter = "Excel files (*.xlsx)|*.xlsx|Excel 2007 (*.xls)|*.xls";
-                saveFileDialog.FilterIndex = 1;
-
-                if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    DataTable dt = Excel.DataGridView_To_Datatable(dataGridView1);
-                    dt.exportToExcel(saveFileDialog.FileName);
-                    MessageBox.Show("Данные экспортированы!");
-                }
+                timer.Stop();
+                iteration = 0;
+                ExportToExcel.SaveFile(saveFileDialog.FileName);
             }
-            catch (Exception ex) { MessageBox.Show(ex.Message); }
         }
     }
 }
