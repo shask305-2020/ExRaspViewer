@@ -6,6 +6,11 @@ using System.Threading.Tasks;
 
 namespace ExRaspViewer.Classes
 {
+    public class Pedagog
+    {
+        public int Id_Pedagog { get; set; }
+        public string Fio_Pedagog { get; set; }
+    }
     public class Service
     {
         public int NumNed { get; set; }

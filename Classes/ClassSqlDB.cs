@@ -76,19 +76,41 @@ namespace ExRaspViewer.Classes
                 return table;
             }
         }
+                
         //Загрузка данных по нагрузке преподавателей в dgv в отчете
-        public DataTable LoadNagrPrepodOtchet(int id)
+        public DataTable LoadNagrPrepodOtchet(int idPrepod, string dat_N, string dat_K)
         {
             using (SqlCommand command = new SqlCommand("pr_LoadNagrPrepod", connSql))
             {
                 command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.AddWithValue("@IDP", id);
+                command.Parameters.AddWithValue("@IDP", idPrepod);
                 DataTable table = new DataTable();
                 SqlDataAdapter adapter = new SqlDataAdapter(command);
                 adapter.Fill(table);
+                
+                //Добавление столбцов
                 table.Columns.Add("Вып. за период", typeof(int));
                 table.Columns.Add("Вып. с нач. семестра", typeof(int));
                 table.Columns.Add("Ост. на конец периода", typeof(int));
+                
+                //Заполнение добавленных столбцов данными
+                int idg, idp, idd, num, vsego, countDT;
+                idp = idPrepod;
+                countDT = table.Rows.Count;
+                if (countDT > 0)
+                {
+                    for (int i = 0; i < countDT; i++)
+                    {
+                        idg = (int)table.Rows[i][1];
+                        idd = (int)table.Rows[i][2];
+                        num = CountUroki(idp, idg, idd, dat_N, dat_K);    //Выполнено за период
+                        vsego = Convert.ToInt32(table.Rows[i][6]);     //Всего часов
+                        table.Rows[i][7] = num;            //Выполнено за период
+                        int nachGoda = CountUroki(idp, idg, idd, dat_K);
+                        table.Rows[i][8] = nachGoda; //Выполнено с начала года
+                        table.Rows[i][9] = vsego - nachGoda;    //Остаток на конец периода
+                    }
+                }
                 return table;
             }
         }

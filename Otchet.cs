@@ -1,31 +1,30 @@
 ﻿using ExRaspViewer.Classes;
 using System;
+using System.ComponentModel;
+using System.Threading;
+using System.Collections.Generic;
 using System.Data;
 using System.Windows.Forms;
-using NSExcel = Microsoft.Office.Interop.Excel;
 
 namespace ExRaspViewer
 {
     public partial class Otchet : Form
     {
         private ClassSqlDB data = new ClassSqlDB();
-        private Timer timer = new Timer();
-        private int iteration = 0;
         private SaveFileDialog saveFileDialog = new SaveFileDialog();
+        private List<Pedagog> list;  //Создание списка преподавателей
 
         public Otchet()
         {
             InitializeComponent();
             radioButton2.Checked = true;
-            timer.Tick += Timer_Tick;
-            timer.Interval = 700;
         }
 
         private void Otchet_Load(object sender, EventArgs e)
         {
-            LoadMonth();
-            LoadPrepod();
-            LoadDataNagrPrepod();
+            LoadMonth();    //Загрузка списка месяцев
+            LoadPrepod();   //Загруза списка преподавателей
+            LoadDataNagrPrepod();   //Загрузка нагрузки преподавателей
         }
 
         //Загрузка месяцев
@@ -40,15 +39,34 @@ namespace ExRaspViewer
         {
             listBox1.DisplayMember = "FAMIO";
             listBox1.ValueMember = "IDP";
-            listBox1.DataSource = data.LoadPrepodTable();
+            DataTable dt = data.LoadPrepodTable();
+            listBox1.DataSource = dt;
+
+            //Создание списка преподавателей
+            list = new List<Pedagog>(dt.Rows.Count);
+            foreach (DataRow item in dt.Rows)
+            {
+                var cells = item.ItemArray;
+                list.Add(new Pedagog()
+                {
+                    Id_Pedagog = (int)cells[0],
+                    Fio_Pedagog = cells[1].ToString()
+                });
+            }
         }
 
         //Загрузка нагрузки преподавателей
         private void LoadDataNagrPrepod()
         {
-            int id = (int)listBox1.SelectedValue;
-            dataGridView1.DataSource = data.LoadNagrPrepodOtchet(id);
+            int id = 0;
+            if (listBox1.Items.Count > 0)
+                id = (int)listBox1.SelectedValue;
 
+            string dat_N = date1.Value.ToString("d");
+            string dat_K = date2.Value.ToString("d");
+            dataGridView1.DataSource = data.LoadNagrPrepodOtchet(id, dat_N, dat_K);
+
+            //Скрытие столбцов с id
             dataGridView1.Columns["IDG"].Visible = false;
             dataGridView1.Columns["IDP"].Visible = false;
             dataGridView1.Columns["IDD"].Visible = false;
@@ -65,8 +83,7 @@ namespace ExRaspViewer
             dataGridView1.Columns[8].AutoSizeMode = DataGridViewAutoSizeColumnMode.None; //Выполнено с начала семестра
             dataGridView1.Columns[8].Width = 60;
             dataGridView1.Columns[9].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill; //Остаток на конец периода
-            CurrentHoursPrepod();
-
+            
             //Отключение пользовательской сортировки
             for (int i = 0; i < dataGridView1.ColumnCount; i++)
             {
@@ -74,35 +91,7 @@ namespace ExRaspViewer
             }
         }
 
-        //Отображние данных по пройденным урокам и остатку (для преподавателей)
-        private void CurrentHoursPrepod()
-        {
-            int idg, idp, idd, num, vsego;
-            string dat_N = date1.Value.ToString("d");
-            string dat_K = date2.Value.ToString("d");
-            int countDGV = dataGridView1.Rows.Count;
-            if (dataGridView1.Rows.Count > 0)
-            {
-                for (int i = 0; i < countDGV; i++)
-                {
-                    idp = (int)dataGridView1[0, i].Value;
-                    idg = (int)dataGridView1[1, i].Value;
-                    idd = (int)dataGridView1[2, i].Value;
-                    num = data.CountUroki(idp, idg, idd, dat_N, dat_K);    //Выполнено за период
-                    vsego = Convert.ToInt32(dataGridView1[6, i].Value);     //Всего часов
-                    dataGridView1[7, i].Value = num;            //Выполнено за период
-                    int nachGoda = data.CountUroki(idp, idg, idd, dat_K);
-                    dataGridView1[8, i].Value = nachGoda; //Выполнено с начала года
-                    dataGridView1[9, i].Value = vsego - nachGoda;    //Остаток на конец периода
-                }
-            }
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            CurrentHoursPrepod();
-        }
-
+        //Смена преподавателя
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             txTeacher.Text = listBox1.Text;
@@ -156,22 +145,37 @@ namespace ExRaspViewer
             saveFileDialog.Filter = "Excel files (*.xlsx)|*.xlsx|Excel 2003 (*.xls)|*.xls";
             saveFileDialog.FilterIndex = 1;
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                timer.Start();
+                LoadDataPedagog();
         }
 
-        private void Timer_Tick(object sender, EventArgs e)
+        //Экспорт данных по всем преподавателям
+        private void LoadDataPedagog()
         {
-            listBox1.SelectedIndex = iteration;
-            string pedagog = txTeacher.Text;
-            DataTable dt = ExportToExcel.DataGridView_To_Datatable(dataGridView1);
-            dt.Export(pedagog);
-            iteration++;
-            if (iteration >= listBox1.Items.Count)
+            string dat_N = date1.Value.ToString("d");
+            string dat_K = date2.Value.ToString("d");
+            int idp;
+            string fio_pedagog;
+            ExportToExcel.datN = dat_N;
+            ExportToExcel.datK = dat_K;
+            DataTable dt = new DataTable();
+            foreach (var item in list)
             {
-                timer.Stop();
-                iteration = 0;
-                ExportToExcel.SaveFile(saveFileDialog.FileName);
+                idp = item.Id_Pedagog;
+                fio_pedagog = item.Fio_Pedagog;
+                dt = data.LoadNagrPrepodOtchet(idp, dat_N, dat_K);
+                ExportToExcel.Export(dt, fio_pedagog);
             }
+            ExportToExcel.SaveFile(saveFileDialog.FileName);
+        }
+
+        //Обновление данных
+        private void date1_ValueChanged(object sender, EventArgs e)
+        {
+            LoadDataNagrPrepod();
+        }
+        private void date2_ValueChanged(object sender, EventArgs e)
+        {
+            LoadDataNagrPrepod();
         }
     }
 }

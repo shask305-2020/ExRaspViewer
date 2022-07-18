@@ -11,8 +11,9 @@ namespace ExRaspViewer.Classes
         //Создание процесса Excel. Он будет висеть в памяти, пока основное приложение запущено
         public static NSExcel.Application AppExcel = new NSExcel.Application();
         private static int _currentRow = 0;
+        public static string datN = "", datK = "";
 
-        public static void Export(this DataTable DataTable, string pedagog)
+        public static void Export(DataTable DataTable, string pedagog)
         {
             try
             {
@@ -22,12 +23,23 @@ namespace ExRaspViewer.Classes
 
                 if (AppExcel.Workbooks.Count < 1)
                     AppExcel.Workbooks.Add();   //Добавление рабочей книги
-                
+
+
                 NSExcel._Worksheet Worksheet = AppExcel.ActiveSheet;    //Установление рабочего листа
-                object[] Header = new object[ColumnsCount - 3];     //Массив для названий колонок (первые три с id не берем)
+                object[] Header = new object[ColumnsCount - 3];     //Массив для названий колонок (первые три с id не берём)
                 for (int i = 0; i < ColumnsCount - 3; i++)
                     Header[i] = DataTable.Columns[i + 3].ColumnName;    //Заполнение массива названиями колонок
-                
+
+                if (_currentRow == 0)
+                {
+                    _currentRow++;
+                    NSExcel.Range _excelCells = Worksheet.get_Range((NSExcel.Range)(Worksheet.Cells[_currentRow, 1]), (NSExcel.Range)(Worksheet.Cells[_currentRow, 7]));
+                    _excelCells.Merge(Type.Missing);
+                    Worksheet.Cells[_currentRow, 1] = $"Выполнение педагогической нагрузки за период с {datN} по {datK}";
+                    _excelCells.Font.Bold = true;
+                    _excelCells.HorizontalAlignment = NSExcel.XlHAlign.xlHAlignCenter;
+                }
+
                 _currentRow++;
                 //Запись Ф.И.О. преподавателя в первую ячейку
                 Worksheet.Cells[_currentRow, 2] = pedagog;
@@ -62,6 +74,8 @@ namespace ExRaspViewer.Classes
                         Cells[j, i] = DataTable.Rows[j][i + 3];
 
                 _currentRow++;
+                int startRow = _currentRow;
+
                 //Выделение диапазона ячеек для заполнения данными
                 NSExcel.Range DataRange = Worksheet.get_Range((NSExcel.Range)(Worksheet.Cells[_currentRow, 1]), (NSExcel.Range)(Worksheet.Cells[_currentRow + RowsCount - 1, ColumnsCount - 3]));
                 DataRange.Value = Cells;
@@ -73,7 +87,30 @@ namespace ExRaspViewer.Classes
                 DataRange.Cells.Borders[NSExcel.XlBordersIndex.xlInsideVertical].LineStyle = NSExcel.XlLineStyle.xlContinuous;
                 DataRange.Cells.Borders[NSExcel.XlBordersIndex.xlInsideHorizontal].LineStyle = NSExcel.XlLineStyle.xlContinuous;
 
+                Worksheet.Columns.AutoFit();
+
                 _currentRow += RowsCount;
+                int endRow = _currentRow - 1;
+                //Вычисление сумм по столбцам
+                Worksheet.Cells[_currentRow, 2] = "Итого";
+                
+                if (startRow != endRow)
+                {
+                    Worksheet.Cells[_currentRow, 5].Formula = $"=SUM(E{startRow}:E{endRow})";   //Вычисление суммы "Выполнено за период"
+                    Worksheet.Cells[_currentRow, 6].Formula = $"=SUM(F{startRow}:F{endRow})";   //Вычисление суммы "Выполнено с начала семестра"
+                    Worksheet.Cells[_currentRow, 7].Formula = $"=SUM(G{startRow}:G{endRow})";   //Вычисление суммы "Остаток на конец периода"
+                }
+                else
+                {
+                    Worksheet.Cells[_currentRow, 5] = "0";   //Вычисление суммы "Выполнено за период"
+                    Worksheet.Cells[_currentRow, 6] = "0";   //Вычисление суммы "Выполнено с начала семестра"
+                    Worksheet.Cells[_currentRow, 7] = "0";   //Вычисление суммы "Остаток на конец периода"
+                }
+
+                HeaderRange = Worksheet.get_Range((NSExcel.Range)(Worksheet.Cells[_currentRow, 2]), (NSExcel.Range)(Worksheet.Cells[_currentRow, 7]));
+                HeaderRange.Font.Bold = true;   //Установление полужирного начертания для строки заголовков
+
+                _currentRow++;
             }
             catch (Exception ex)
             {
@@ -111,25 +148,6 @@ namespace ExRaspViewer.Classes
             {
                 AppExcel.Visible = true;
             }
-        }
-
-        public static DataTable DataGridView_To_Datatable(DataGridView dg)
-        {
-            DataTable ExportDataTable = new DataTable();
-            foreach (DataGridViewColumn col in dg.Columns)
-            {
-                ExportDataTable.Columns.Add(col.Name);
-            }
-            foreach (DataGridViewRow row in dg.Rows)
-            {
-                DataRow dRow = ExportDataTable.NewRow();
-                foreach (DataGridViewCell cell in row.Cells)
-                {
-                    dRow[cell.ColumnIndex] = cell.Value;
-                }
-                ExportDataTable.Rows.Add(dRow);
-            }
-            return ExportDataTable;
         }
     }
 }
