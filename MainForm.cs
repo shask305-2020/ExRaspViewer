@@ -30,7 +30,7 @@ namespace ExRaspViewer
         private int semestr;    //Семестр
         private int tekNed = 4; //Текущая неделя
         private int state = 0;  //если 0, то данные сохранены, 1 - данные еще не сохранены
-
+        private int _information = 0;
 
         public MainForm()
         {
@@ -312,6 +312,10 @@ namespace ExRaspViewer
             SummRowPlanGroup(); //Сумма по строкам
             SummColumnPlanLoadGroup();
             ColumnPlanWidthGroup(); //Установка ширины столбцов
+
+            //Автовысота таблицы
+            _information = 22 * dataGridView3.RowCount + 50;
+            splitContainer1.SplitterDistance = _information;
         }
 
         //Загрузка данных по плану в DGV (для преподавателей)
@@ -348,6 +352,8 @@ namespace ExRaspViewer
             SummRowPlanPrep();  //Сумма по строкам
             SummColumnPlanLoadPrep();
             ColumnPlanWidthPrep();  //Установка ширины столбцов
+
+            
         }
 
         //Задание ширины столбцов в таблице плана у групп
@@ -803,6 +809,12 @@ namespace ExRaspViewer
         {
             About form = new About();
             form.ShowDialog();
+        }
+
+        private void listBox2_Click(object sender, EventArgs e)
+        {
+            //Автовысота таблицы
+            splitContainer1.SplitterDistance = 80;
         }
     }
 }

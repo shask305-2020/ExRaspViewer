@@ -56,7 +56,6 @@
             this.lbDay = new System.Windows.Forms.Label();
             this.dateTimePicker1 = new System.Windows.Forms.DateTimePicker();
             this.label1 = new System.Windows.Forms.Label();
-            this.colorDialog1 = new System.Windows.Forms.ColorDialog();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.labelNumNed = new System.Windows.Forms.ToolStripStatusLabel();
@@ -156,7 +155,7 @@
             // отчётЗаМесяцToolStripMenuItem
             // 
             this.отчётЗаМесяцToolStripMenuItem.Name = "отчётЗаМесяцToolStripMenuItem";
-            this.отчётЗаМесяцToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.отчётЗаМесяцToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
             this.отчётЗаМесяцToolStripMenuItem.Text = "Отчёт за период";
             this.отчётЗаМесяцToolStripMenuItem.Click += new System.EventHandler(this.отчётЗаМесяцToolStripMenuItem_Click);
             // 
@@ -171,7 +170,7 @@
             // оПрограммеToolStripMenuItem1
             // 
             this.оПрограммеToolStripMenuItem1.Name = "оПрограммеToolStripMenuItem1";
-            this.оПрограммеToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            this.оПрограммеToolStripMenuItem1.Size = new System.Drawing.Size(149, 22);
             this.оПрограммеToolStripMenuItem1.Text = "О программе";
             this.оПрограммеToolStripMenuItem1.Click += new System.EventHandler(this.оПрограммеToolStripMenuItem1_Click);
             // 
@@ -215,6 +214,7 @@
             this.listBox2.Name = "listBox2";
             this.listBox2.Size = new System.Drawing.Size(189, 281);
             this.listBox2.TabIndex = 3;
+            this.listBox2.Click += new System.EventHandler(this.listBox2_Click);
             this.listBox2.SelectedIndexChanged += new System.EventHandler(this.listBox2_SelectedIndexChanged);
             // 
             // dataGridView2
@@ -397,13 +397,18 @@
             // 
             this.splitContainer1.Panel1.AutoScroll = true;
             this.splitContainer1.Panel1.Controls.Add(this.tableLayoutPanel2);
+            this.splitContainer1.Panel1.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.splitContainer1.Panel1MinSize = 80;
             // 
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.tableLayoutPanel3);
+            this.splitContainer1.Panel2.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.splitContainer1.Panel2MinSize = 80;
+            this.splitContainer1.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.splitContainer1.Size = new System.Drawing.Size(1059, 572);
-            this.splitContainer1.SplitterDistance = 285;
-            this.splitContainer1.SplitterWidth = 3;
+            this.splitContainer1.SplitterDistance = 283;
+            this.splitContainer1.SplitterWidth = 6;
             this.splitContainer1.TabIndex = 4;
             // 
             // tableLayoutPanel2
@@ -420,7 +425,7 @@
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 1;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(1055, 281);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(1055, 279);
             this.tableLayoutPanel2.TabIndex = 0;
             // 
             // dataGridView3
@@ -489,7 +494,7 @@
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(1055, 280);
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(1055, 279);
             this.tableLayoutPanel3.TabIndex = 0;
             // 
             // dataGridView4
@@ -581,7 +586,6 @@
         private System.Windows.Forms.ToolStripMenuItem выходToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem заполнитьНеделиДля1СемToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem заполнитьНеделиДля2СемToolStripMenuItem;
-        private System.Windows.Forms.ColorDialog colorDialog1;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button4;
