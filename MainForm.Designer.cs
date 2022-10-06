@@ -202,6 +202,7 @@
             this.listBox1.Name = "listBox1";
             this.listBox1.Size = new System.Drawing.Size(189, 281);
             this.listBox1.TabIndex = 2;
+            this.listBox1.Click += new System.EventHandler(this.listBox1_Click);
             this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
             // 
             // listBox2
@@ -239,8 +240,8 @@
             this.dataGridView2.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridView2.Size = new System.Drawing.Size(480, 283);
             this.dataGridView2.TabIndex = 5;
-            this.dataGridView2.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView2_CellDoubleClick);
             this.dataGridView2.SelectionChanged += new System.EventHandler(this.dataGridView2_SelectionChanged);
+            this.dataGridView2.Click += new System.EventHandler(this.dataGridView2_Click);
             // 
             // panel1
             // 
@@ -446,11 +447,13 @@
             dataGridViewCellStyle2.SelectionBackColor = System.Drawing.Color.PaleTurquoise;
             dataGridViewCellStyle2.SelectionForeColor = System.Drawing.Color.Black;
             this.dataGridView3.RowsDefaultCellStyle = dataGridViewCellStyle2;
+            this.dataGridView3.RowTemplate.Height = 20;
             this.dataGridView3.Size = new System.Drawing.Size(561, 284);
             this.dataGridView3.TabIndex = 8;
             this.dataGridView3.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.dataGridView3_CellBeginEdit);
             this.dataGridView3.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView3_CellEndEdit);
             this.dataGridView3.SelectionChanged += new System.EventHandler(this.dataGridView3_SelectionChanged);
+            this.dataGridView3.Click += new System.EventHandler(this.dataGridView3_Click);
             this.dataGridView3.Enter += new System.EventHandler(this.dataGridView3_Enter);
             this.dataGridView3.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dataGridView3_KeyDown);
             this.dataGridView3.Leave += new System.EventHandler(this.dataGridView3_Leave);
@@ -477,8 +480,8 @@
             this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridView1.Size = new System.Drawing.Size(480, 284);
             this.dataGridView1.TabIndex = 4;
-            this.dataGridView1.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView1_CellDoubleClick);
             this.dataGridView1.SelectionChanged += new System.EventHandler(this.dataGridView1_SelectionChanged);
+            this.dataGridView1.Click += new System.EventHandler(this.dataGridView1_Click);
             // 
             // tableLayoutPanel3
             // 
@@ -515,11 +518,13 @@
             dataGridViewCellStyle4.SelectionBackColor = System.Drawing.Color.PaleTurquoise;
             dataGridViewCellStyle4.SelectionForeColor = System.Drawing.Color.Black;
             this.dataGridView4.RowsDefaultCellStyle = dataGridViewCellStyle4;
+            this.dataGridView4.RowTemplate.Height = 20;
             this.dataGridView4.Size = new System.Drawing.Size(561, 283);
             this.dataGridView4.TabIndex = 8;
             this.dataGridView4.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.dataGridView4_CellBeginEdit);
             this.dataGridView4.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView4_CellEndEdit);
             this.dataGridView4.SelectionChanged += new System.EventHandler(this.dataGridView4_SelectionChanged);
+            this.dataGridView4.Click += new System.EventHandler(this.dataGridView4_Click);
             this.dataGridView4.Enter += new System.EventHandler(this.dataGridView4_Enter);
             this.dataGridView4.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dataGridView4_KeyDown);
             this.dataGridView4.Leave += new System.EventHandler(this.dataGridView4_Leave);

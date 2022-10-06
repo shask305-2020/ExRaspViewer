@@ -31,6 +31,7 @@ namespace ExRaspViewer
         private int tekNed = 4; //Текущая неделя
         private int state = 0;  //если 0, то данные сохранены, 1 - данные еще не сохранены
         private int _information = 0;
+        private bool _listGroupClick = false;
 
         public MainForm()
         {
@@ -314,8 +315,12 @@ namespace ExRaspViewer
             ColumnPlanWidthGroup(); //Установка ширины столбцов
 
             //Автовысота таблицы
-            _information = 22 * dataGridView3.RowCount + 50;
-            splitContainer1.SplitterDistance = _information;
+            if (_listGroupClick)
+            {
+                _information = 20 * dataGridView3.RowCount + 50;
+                splitContainer1.SplitterDistance = _information;
+                _listGroupClick = false;
+            }
         }
 
         //Загрузка данных по плану в DGV (для преподавателей)
@@ -789,16 +794,6 @@ namespace ExRaspViewer
             dataGridView4.Focus();
         }
 
-        private void dataGridView1_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-            dataGridView3.Focus();
-        }
-
-        private void dataGridView2_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-            dataGridView4.Focus();
-        }
-
         private void отчётЗаМесяцToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Otchet form = new Otchet();
@@ -814,6 +809,43 @@ namespace ExRaspViewer
         private void listBox2_Click(object sender, EventArgs e)
         {
             //Автовысота таблицы
+            splitContainer1.SplitterDistance = 80;
+            dataGridView4.Focus();
+        }
+
+        private void listBox1_Click(object sender, EventArgs e)
+        {
+            _listGroupClick = true;
+            dataGridView3.Focus();
+        }
+
+        private void dataGridView1_Click(object sender, EventArgs e)
+        {
+            dataGridView3.Focus();
+            if (_information == 0)
+            {
+                _information = 20 * dataGridView3.RowCount + 50;
+            }
+            splitContainer1.SplitterDistance = _information;
+        }
+
+        private void dataGridView2_Click(object sender, EventArgs e)
+        {
+            dataGridView4.Focus();
+            splitContainer1.SplitterDistance = 80;
+        }
+
+        private void dataGridView3_Click(object sender, EventArgs e)
+        {
+            if (_information == 0)
+            {
+                _information = 20 * dataGridView3.RowCount + 50;
+            }
+            splitContainer1.SplitterDistance = _information;
+        }
+
+        private void dataGridView4_Click(object sender, EventArgs e)
+        {
             splitContainer1.SplitterDistance = 80;
         }
     }
