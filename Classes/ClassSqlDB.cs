@@ -30,18 +30,68 @@ namespace ExRaspViewer.Classes
         }
 
         //Загрузка данных по нагрузке групп в DataGridView1
-        public DataTable LoadNagruzkaGrupp(int id)
+        //public DataTable LoadNagruzkaGrupp(int id)
+        //{
+        //    using (SqlCommand command = new SqlCommand("pr_LoadNagrGroup", connSql))
+        //    {
+        //        command.CommandType = CommandType.StoredProcedure;
+        //        command.Parameters.AddWithValue("@IDG", id);
+        //        DataTable table = new DataTable();
+        //        SqlDataAdapter adapter = new SqlDataAdapter(command);
+        //        adapter.Fill(table);
+        //        table.Columns.Add("Вып.", typeof(int));
+        //        table.Columns.Add("Ост.", typeof(int));
+        //        table.Columns.Add("Ост.план", typeof(int));
+        //        return table;
+        //    }
+        //}
+
+        //Загрузка данных по нагрузке групп в DataGridView1
+        public DataTable LoadNagruzkaGrupp(int id, string dat)
         {
             using (SqlCommand command = new SqlCommand("pr_LoadNagrGroup", connSql))
             {
+                int idg, idp, idd, num, vsego;
+
                 command.CommandType = CommandType.StoredProcedure;
                 command.Parameters.AddWithValue("@IDG", id);
                 DataTable table = new DataTable();
                 SqlDataAdapter adapter = new SqlDataAdapter(command);
                 adapter.Fill(table);
-                table.Columns.Add("Вып.", typeof(int));
-                table.Columns.Add("Ост.", typeof(int));
-                table.Columns.Add("Ост.план", typeof(int));
+                table.Columns.Add("Вып", typeof(int));
+                table.Columns.Add("Ост", typeof(int));
+                table.Columns.Add("Ост_план", typeof(int));
+                int count = table.Rows.Count;
+                if (count > 0)
+                {
+                    int sumVsego = 0, sumVyp = 0, sumOst = 0;
+                    for (int i = 0; i < count; i++)
+                    {
+                        idg = (int)table.Rows[i][0];
+                        idp = (int)table.Rows[i][1];
+                        idd = (int)table.Rows[i][2];
+                        num = CountUroki(idp, idg, idd, dat);
+                        vsego = Convert.ToInt32(table.Rows[i][6]);
+                        table.Rows[i][7] = num;             //Выполнено
+                        table.Rows[i][8] = vsego - num;     //Остаток
+
+                        //Вычисление суммы по столбцам
+                        //Если подгруппа 2, то сумму не считаем
+                        byte grup2 = 2;
+                        if ((byte)table.Rows[i][5] != grup2)
+                        {
+                            sumVsego += vsego;
+                            sumVyp += num;
+                            sumOst += (int)table.Rows[i][8];
+                        }
+                    }
+                    table.Rows.Add();
+                    table.Rows[count][4] = "Сумма";
+                    table.Rows[count][6] = sumVsego;
+                    table.Rows[count][7] = sumVyp;
+                    table.Rows[count][8] = sumOst;
+                }
+
                 return table;
             }
         }

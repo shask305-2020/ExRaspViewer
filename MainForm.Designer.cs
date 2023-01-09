@@ -237,6 +237,7 @@
             dataGridViewCellStyle1.SelectionBackColor = System.Drawing.Color.PaleTurquoise;
             dataGridViewCellStyle1.SelectionForeColor = System.Drawing.Color.Black;
             this.dataGridView2.RowsDefaultCellStyle = dataGridViewCellStyle1;
+            this.dataGridView2.RowTemplate.Height = 20;
             this.dataGridView2.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridView2.Size = new System.Drawing.Size(480, 283);
             this.dataGridView2.TabIndex = 5;
@@ -477,6 +478,7 @@
             dataGridViewCellStyle3.SelectionBackColor = System.Drawing.Color.PaleTurquoise;
             dataGridViewCellStyle3.SelectionForeColor = System.Drawing.Color.Black;
             this.dataGridView1.RowsDefaultCellStyle = dataGridViewCellStyle3;
+            this.dataGridView1.RowTemplate.Height = 20;
             this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.dataGridView1.Size = new System.Drawing.Size(480, 284);
             this.dataGridView1.TabIndex = 4;

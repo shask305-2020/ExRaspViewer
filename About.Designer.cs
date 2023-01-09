@@ -78,12 +78,13 @@
             // 
             // label4
             // 
-            this.label4.Location = new System.Drawing.Point(12, 187);
+            this.label4.Location = new System.Drawing.Point(12, 178);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(331, 59);
+            this.label4.Size = new System.Drawing.Size(331, 73);
             this.label4.TabIndex = 3;
-            this.label4.Text = "Автор-разрботчик - Южаков Антон Валерьевич,\r\nпреподаватель спец.дисциплин в ГБПОУ" +
-    " \"Шумихинский аграрно-строительный колледж\"\r\nCopyright © Антон Южаков, 2022";
+            this.label4.Text = "Автор-разрботчик - Южаков Антон Валерьевич,\r\nпреподаватель спец.дисциплин в \r\nГБП" +
+    "ОУ \"Шумихинский аграрно-строительный колледж\"\r\n\r\nCopyright © Антон Южаков, 2022-" +
+    "2023";
             // 
             // button1
             // 

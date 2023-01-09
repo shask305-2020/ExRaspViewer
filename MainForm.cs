@@ -108,7 +108,8 @@ namespace ExRaspViewer
         private void LoadDataNagruzkaGrupp()
         {
             int id = (int)listBox1.SelectedValue;
-            dataGridView1.DataSource = data.LoadNagruzkaGrupp(id);
+            string workDate = dateTimePicker1.Value.ToString();
+            dataGridView1.DataSource = data.LoadNagruzkaGrupp(id, workDate);
             
             dataGridView1.Columns["IDG"].Visible = false;
             dataGridView1.Columns["IDP"].Visible = false;
@@ -126,7 +127,7 @@ namespace ExRaspViewer
             dataGridView1.Columns[8].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             dataGridView1.Columns[8].Width = 50;
             dataGridView1.Columns[9].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            CurrentHoursGroup();
+            //CurrentHoursGroup();
 
             //Отключение пользовательской сортировки
             for (int i = 0; i < dataGridView1.ColumnCount; i++)
@@ -188,17 +189,19 @@ namespace ExRaspViewer
         //Отображние данных по пройденным урокам и остатку (для групп)
         private void CurrentHoursGroup()
         {
-            int idg, idp, idd, num, vsego;
-            string dat = dateTimePicker1.Value.ToString("d");
+            //int idg, idp, idd, num, vsego;
+            int num, vsego;
+            //string dat = dateTimePicker1.Value.ToString("d");
             int countDGV = dataGridView1.Rows.Count;
             for (int i = 0; i < countDGV; i++)
             {
-                idg = (int)dataGridView1[0, i].Value;
-                idp = (int)dataGridView1[1, i].Value;
-                idd = (int)dataGridView1[2, i].Value;
-                num = data.CountUroki(idp, idg, idd, dat);
+                //idg = (int)dataGridView1[0, i].Value;
+                //idp = (int)dataGridView1[1, i].Value;
+                //idd = (int)dataGridView1[2, i].Value;
+                //num = data.CountUroki(idp, idg, idd, dat);
+                num = (int)dataGridView1[7, i].Value;
                 vsego = Convert.ToInt32(dataGridView1[6, i].Value);
-                dataGridView1[7, i].Value = num;            //Выполнено
+                //dataGridView1[7, i].Value = num;            //Выполнено
                 dataGridView1[8, i].Value = vsego - num;    //Остаток
             }
         }
@@ -226,7 +229,10 @@ namespace ExRaspViewer
             lbDay.Text = dateTimePicker1.Value.ToString("ddd");
             tekNed = Nedelya() + 3;
             labelNumNed.Text = Convert.ToString(tekNed - 3);
-            CurrentHoursGroup();
+
+            LoadDataNagruzkaGrupp();
+            SummRowPlanGroup();
+            //CurrentHoursGroup();
             CurrentHoursPrepod();
         }
 
@@ -439,7 +445,8 @@ namespace ExRaspViewer
         {
             int rowIndex = dataGridView3.CurrentCell.RowIndex;
             if (dataGridView3.Focused && rowIndex != -1 && rowIndex != dataGridView3.RowCount - 1)
-                dataGridView1.Rows[rowIndex].Selected = true;
+                if (dataGridView1.Rows.Count !=0)
+                    dataGridView1.Rows[rowIndex].Selected = true;
         }
 
         //Смена строки в плане преподавателей
@@ -447,7 +454,8 @@ namespace ExRaspViewer
         {
             int rowIndex = dataGridView4.CurrentCell.RowIndex;
             if (dataGridView4.Focused && rowIndex != -1 && rowIndex != dataGridView4.RowCount - 1)
-                dataGridView2.Rows[rowIndex].Selected = true;
+                if (dataGridView2.Rows.Count != 0)
+                    dataGridView2.Rows[rowIndex].Selected = true;
         }
 
         //Подсчет элементов в столбце (план групп)
