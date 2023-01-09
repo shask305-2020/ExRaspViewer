@@ -78,6 +78,7 @@
     <Compile Include="Classes\Excel.cs" />
     <Compile Include="Classes\ExportToExcel.cs" />
     <Compile Include="Classes\Service.cs" />
+    <Compile Include="Classes\SqlDB.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -18,10 +18,8 @@ namespace ExRaspViewer.Classes
         //Загрузка списка групп в ListBox1
         public DataTable LoadGroupTable()
         {
-            using (SqlCommand command = new SqlCommand("pr_LoadGroup", connSql))
+            using (SqlCommand command = new SqlCommand("SELECT * FROM [dbo].[LoadGroup]", connSql))
             {
-                command.CommandType = CommandType.StoredProcedure;
-
                 DataTable table = new DataTable();
                 SqlDataAdapter adapter = new SqlDataAdapter(command);
                 adapter.Fill(table);

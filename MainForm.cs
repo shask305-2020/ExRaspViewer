@@ -92,7 +92,7 @@ namespace ExRaspViewer
         {
             listBox1.DisplayMember = "NAIM";
             listBox1.ValueMember = "IDG";
-            listBox1.DataSource = data.LoadGroupTable();
+            listBox1.DataSource = SqlDB.LoadTable("ListOfGroups");
         }
 
         //Загрузка списка преподавателей в ListBox
@@ -100,7 +100,7 @@ namespace ExRaspViewer
         {
             listBox2.DisplayMember = "FAMIO";
             listBox2.ValueMember = "IDP";
-            listBox2.DataSource = data.LoadPrepodTable();
+            listBox2.DataSource = SqlDB.LoadTable("ListOfTeachers");
         }
 
         //Загрузка данных по нагрузке групп в DataGridView
@@ -109,8 +109,8 @@ namespace ExRaspViewer
         {
             int id = (int)listBox1.SelectedValue;
             string workDate = dateTimePicker1.Value.ToString();
-            dataGridView1.DataSource = data.LoadNagruzkaGrupp(id, workDate);
-            
+            dataGridView1.DataSource = SqlDB.GroupLoad(id, workDate);
+
             dataGridView1.Columns["IDG"].Visible = false;
             dataGridView1.Columns["IDP"].Visible = false;
             dataGridView1.Columns["IDD"].Visible = false;
@@ -141,7 +141,8 @@ namespace ExRaspViewer
         private void LoadDataNagrPrepod()
         {
             int id = (int)listBox2.SelectedValue;
-            dataGridView2.DataSource = data.LoadNagrPrepod(id);
+            string workDate = dateTimePicker1.Value.ToString();
+            dataGridView2.DataSource = SqlDB.TeacherLoad(id, workDate);
 
             dataGridView2.Columns["IDG"].Visible = false;
             dataGridView2.Columns["IDP"].Visible = false;
@@ -159,7 +160,7 @@ namespace ExRaspViewer
             dataGridView2.Columns[8].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             dataGridView2.Columns[8].Width = 50;
             dataGridView2.Columns[9].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            CurrentHoursPrepod();
+            //CurrentHoursPrepod();
 
             //Отключение пользовательской сортировки
             for (int i = 0; i < dataGridView2.ColumnCount; i++)
@@ -186,25 +187,7 @@ namespace ExRaspViewer
             LoadDataPlanPrep();
         }
 
-        //Отображние данных по пройденным урокам и остатку (для групп)
-        private void CurrentHoursGroup()
-        {
-            //int idg, idp, idd, num, vsego;
-            int num, vsego;
-            //string dat = dateTimePicker1.Value.ToString("d");
-            int countDGV = dataGridView1.Rows.Count;
-            for (int i = 0; i < countDGV; i++)
-            {
-                //idg = (int)dataGridView1[0, i].Value;
-                //idp = (int)dataGridView1[1, i].Value;
-                //idd = (int)dataGridView1[2, i].Value;
-                //num = data.CountUroki(idp, idg, idd, dat);
-                num = (int)dataGridView1[7, i].Value;
-                vsego = Convert.ToInt32(dataGridView1[6, i].Value);
-                //dataGridView1[7, i].Value = num;            //Выполнено
-                dataGridView1[8, i].Value = vsego - num;    //Остаток
-            }
-        }
+        
         //Отображние данных по пройденным урокам и остатку (для преподавателей)
         private void CurrentHoursPrepod()
         {
@@ -232,8 +215,11 @@ namespace ExRaspViewer
 
             LoadDataNagruzkaGrupp();
             SummRowPlanGroup();
+
+            LoadDataNagrPrepod();
+            SummRowPlanPrep();
             //CurrentHoursGroup();
-            CurrentHoursPrepod();
+            //CurrentHoursPrepod();
         }
 
         //Вычисление номера недели
@@ -363,8 +349,6 @@ namespace ExRaspViewer
             SummRowPlanPrep();  //Сумма по строкам
             SummColumnPlanLoadPrep();
             ColumnPlanWidthPrep();  //Установка ширины столбцов
-
-            
         }
 
         //Задание ширины столбцов в таблице плана у групп
