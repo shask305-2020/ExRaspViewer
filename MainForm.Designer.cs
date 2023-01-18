@@ -35,15 +35,15 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.открытьБДToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.выходToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuOpenDB = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuExit = new System.Windows.Forms.ToolStripMenuItem();
             this.справочникиToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.заполнитьНеделиДля1СемToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.заполнитьНеделиДля2СемToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuFill_1term = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuFill_2term = new System.Windows.Forms.ToolStripMenuItem();
             this.отчетыToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.отчётЗаМесяцToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuMonthlyReport = new System.Windows.Forms.ToolStripMenuItem();
             this.оПрограммеToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.оПрограммеToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuAbout = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.listBox2 = new System.Windows.Forms.ListBox();
@@ -101,78 +101,78 @@
             // toolStripMenuItem1
             // 
             this.toolStripMenuItem1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.открытьБДToolStripMenuItem,
-            this.выходToolStripMenuItem});
+            this.menuOpenDB,
+            this.menuExit});
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
             this.toolStripMenuItem1.Size = new System.Drawing.Size(48, 20);
             this.toolStripMenuItem1.Text = "Файл";
             // 
-            // открытьБДToolStripMenuItem
+            // menuOpenDB
             // 
-            this.открытьБДToolStripMenuItem.Name = "открытьБДToolStripMenuItem";
-            this.открытьБДToolStripMenuItem.Size = new System.Drawing.Size(215, 22);
-            this.открытьБДToolStripMenuItem.Text = "Открыть БД (Расписание)";
-            this.открытьБДToolStripMenuItem.Click += new System.EventHandler(this.открытьБДToolStripMenuItem_Click);
+            this.menuOpenDB.Name = "menuOpenDB";
+            this.menuOpenDB.Size = new System.Drawing.Size(215, 22);
+            this.menuOpenDB.Text = "Открыть БД (Расписание)";
+            this.menuOpenDB.Click += new System.EventHandler(this.menuOpenDB_Click);
             // 
-            // выходToolStripMenuItem
+            // menuExit
             // 
-            this.выходToolStripMenuItem.Name = "выходToolStripMenuItem";
-            this.выходToolStripMenuItem.Size = new System.Drawing.Size(215, 22);
-            this.выходToolStripMenuItem.Text = "Выход";
-            this.выходToolStripMenuItem.Click += new System.EventHandler(this.выходToolStripMenuItem_Click);
+            this.menuExit.Name = "menuExit";
+            this.menuExit.Size = new System.Drawing.Size(215, 22);
+            this.menuExit.Text = "Выход";
+            this.menuExit.Click += new System.EventHandler(this.menuExit_Click);
             // 
             // справочникиToolStripMenuItem
             // 
             this.справочникиToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.заполнитьНеделиДля1СемToolStripMenuItem,
-            this.заполнитьНеделиДля2СемToolStripMenuItem});
+            this.menuFill_1term,
+            this.menuFill_2term});
             this.справочникиToolStripMenuItem.Name = "справочникиToolStripMenuItem";
             this.справочникиToolStripMenuItem.Size = new System.Drawing.Size(94, 20);
             this.справочникиToolStripMenuItem.Text = "Справочники";
             // 
-            // заполнитьНеделиДля1СемToolStripMenuItem
+            // menuFill_1term
             // 
-            this.заполнитьНеделиДля1СемToolStripMenuItem.Name = "заполнитьНеделиДля1СемToolStripMenuItem";
-            this.заполнитьНеделиДля1СемToolStripMenuItem.Size = new System.Drawing.Size(233, 22);
-            this.заполнитьНеделиДля1СемToolStripMenuItem.Text = "Заполнить недели для 1 сем.";
-            this.заполнитьНеделиДля1СемToolStripMenuItem.Click += new System.EventHandler(this.заполнитьНеделиДля1СемToolStripMenuItem_Click);
+            this.menuFill_1term.Name = "menuFill_1term";
+            this.menuFill_1term.Size = new System.Drawing.Size(233, 22);
+            this.menuFill_1term.Text = "Заполнить недели для 1 сем.";
+            this.menuFill_1term.Click += new System.EventHandler(this.menuFill_1term_Click);
             // 
-            // заполнитьНеделиДля2СемToolStripMenuItem
+            // menuFill_2term
             // 
-            this.заполнитьНеделиДля2СемToolStripMenuItem.Name = "заполнитьНеделиДля2СемToolStripMenuItem";
-            this.заполнитьНеделиДля2СемToolStripMenuItem.Size = new System.Drawing.Size(233, 22);
-            this.заполнитьНеделиДля2СемToolStripMenuItem.Text = "Заполнить недели для 2 сем.";
-            this.заполнитьНеделиДля2СемToolStripMenuItem.Click += new System.EventHandler(this.заполнитьНеделиДля2СемToolStripMenuItem_Click);
+            this.menuFill_2term.Name = "menuFill_2term";
+            this.menuFill_2term.Size = new System.Drawing.Size(233, 22);
+            this.menuFill_2term.Text = "Заполнить недели для 2 сем.";
+            this.menuFill_2term.Click += new System.EventHandler(this.menuFill_2term_Click);
             // 
             // отчетыToolStripMenuItem
             // 
             this.отчетыToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.отчётЗаМесяцToolStripMenuItem});
+            this.menuMonthlyReport});
             this.отчетыToolStripMenuItem.Name = "отчетыToolStripMenuItem";
             this.отчетыToolStripMenuItem.Size = new System.Drawing.Size(60, 20);
             this.отчетыToolStripMenuItem.Text = "Отчёты";
             // 
-            // отчётЗаМесяцToolStripMenuItem
+            // menuMonthlyReport
             // 
-            this.отчётЗаМесяцToolStripMenuItem.Name = "отчётЗаМесяцToolStripMenuItem";
-            this.отчётЗаМесяцToolStripMenuItem.Size = new System.Drawing.Size(163, 22);
-            this.отчётЗаМесяцToolStripMenuItem.Text = "Отчёт за период";
-            this.отчётЗаМесяцToolStripMenuItem.Click += new System.EventHandler(this.отчётЗаМесяцToolStripMenuItem_Click);
+            this.menuMonthlyReport.Name = "menuMonthlyReport";
+            this.menuMonthlyReport.Size = new System.Drawing.Size(180, 22);
+            this.menuMonthlyReport.Text = "Отчёт за период";
+            this.menuMonthlyReport.Click += new System.EventHandler(this.menuMonthlyReport_Click);
             // 
             // оПрограммеToolStripMenuItem
             // 
             this.оПрограммеToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.оПрограммеToolStripMenuItem1});
+            this.menuAbout});
             this.оПрограммеToolStripMenuItem.Name = "оПрограммеToolStripMenuItem";
             this.оПрограммеToolStripMenuItem.Size = new System.Drawing.Size(65, 20);
             this.оПрограммеToolStripMenuItem.Text = "Справка";
             // 
-            // оПрограммеToolStripMenuItem1
+            // menuAbout
             // 
-            this.оПрограммеToolStripMenuItem1.Name = "оПрограммеToolStripMenuItem1";
-            this.оПрограммеToolStripMenuItem1.Size = new System.Drawing.Size(149, 22);
-            this.оПрограммеToolStripMenuItem1.Text = "О программе";
-            this.оПрограммеToolStripMenuItem1.Click += new System.EventHandler(this.оПрограммеToolStripMenuItem1_Click);
+            this.menuAbout.Name = "menuAbout";
+            this.menuAbout.Size = new System.Drawing.Size(180, 22);
+            this.menuAbout.Text = "О программе";
+            this.menuAbout.Click += new System.EventHandler(this.menuAbout_Click);
             // 
             // tableLayoutPanel1
             // 
@@ -451,7 +451,6 @@
             this.dataGridView3.RowTemplate.Height = 20;
             this.dataGridView3.Size = new System.Drawing.Size(561, 284);
             this.dataGridView3.TabIndex = 8;
-            this.dataGridView3.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.dataGridView3_CellBeginEdit);
             this.dataGridView3.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView3_CellEndEdit);
             this.dataGridView3.SelectionChanged += new System.EventHandler(this.dataGridView3_SelectionChanged);
             this.dataGridView3.Click += new System.EventHandler(this.dataGridView3_Click);
@@ -523,7 +522,6 @@
             this.dataGridView4.RowTemplate.Height = 20;
             this.dataGridView4.Size = new System.Drawing.Size(561, 283);
             this.dataGridView4.TabIndex = 8;
-            this.dataGridView4.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.dataGridView4_CellBeginEdit);
             this.dataGridView4.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridView4_CellEndEdit);
             this.dataGridView4.SelectionChanged += new System.EventHandler(this.dataGridView4_SelectionChanged);
             this.dataGridView4.Click += new System.EventHandler(this.dataGridView4_Click);
@@ -578,9 +576,9 @@
 
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem открытьБДToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem menuOpenDB;
         private System.Windows.Forms.ToolStripMenuItem оПрограммеToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem оПрограммеToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem menuAbout;
         private System.Windows.Forms.ToolStripMenuItem справочникиToolStripMenuItem;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.ListBox listBox1;
@@ -590,9 +588,9 @@
         private System.Windows.Forms.DateTimePicker dateTimePicker1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label lbDay;
-        private System.Windows.Forms.ToolStripMenuItem выходToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem заполнитьНеделиДля1СемToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem заполнитьНеделиДля2СемToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem menuExit;
+        private System.Windows.Forms.ToolStripMenuItem menuFill_1term;
+        private System.Windows.Forms.ToolStripMenuItem menuFill_2term;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button4;
@@ -609,7 +607,7 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
         private System.Windows.Forms.DataGridView dataGridView4;
         private System.Windows.Forms.ToolStripMenuItem отчетыToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem отчётЗаМесяцToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem menuMonthlyReport;
     }
 }
 

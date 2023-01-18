@@ -17,7 +17,6 @@ namespace ExRaspViewer
         public Otchet()
         {
             InitializeComponent();
-            radioButton2.Checked = true;
         }
 
         private void Otchet_Load(object sender, EventArgs e)
@@ -25,6 +24,7 @@ namespace ExRaspViewer
             LoadMonth();    //Загрузка списка месяцев
             LoadPrepod();   //Загруза списка преподавателей
             LoadDataNagrPrepod();   //Загрузка нагрузки преподавателей
+            radioButton2.Checked = true;
         }
 
         //Загрузка месяцев
@@ -39,7 +39,7 @@ namespace ExRaspViewer
         {
             listBox1.DisplayMember = "FAMIO";
             listBox1.ValueMember = "IDP";
-            DataTable dt = data.LoadPrepodTable();
+            DataTable dt = SqlDB.LoadTable("ListOfTeachers");
             listBox1.DataSource = dt;
 
             //Создание списка преподавателей
@@ -115,10 +115,22 @@ namespace ExRaspViewer
             }
             if (radioButton2.Checked)
             {
-                int m1 = DateTime.Now.Month - 1;
-                int m2 = m1 + 1;
-                DateTime d1 = new DateTime(DateTime.Now.Year, m1, 26);
-                DateTime d2 = new DateTime(DateTime.Now.Year, m2, 26);
+                int m1 = Convert.ToInt32(cbMonth.SelectedValue);
+                int m2;
+                DateTime d1, d2;
+                if (m1 == 1 || m1 == 9)
+                {
+                    m2 = m1;
+                    d1 = new DateTime(DateTime.Now.Year, m1, 1);
+                }
+                else
+                {
+                    m1 -= 1;
+                    m2 = m1 + 1;
+                    d1 = new DateTime(DateTime.Now.Year, m1, 26);
+                }
+                d2 = new DateTime(DateTime.Now.Year, m2, 26);
+
                 date1.Value = d1;
                 date2.Value = d2;
             }

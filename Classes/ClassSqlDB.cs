@@ -128,7 +128,7 @@ namespace ExRaspViewer.Classes
         //Загрузка данных по нагрузке преподавателей в dgv в отчете
         public DataTable LoadNagrPrepodOtchet(int idPrepod, string dat_N, string dat_K)
         {
-            using (SqlCommand command = new SqlCommand("pr_LoadNagrPrepod", connSql))
+            using (SqlCommand command = new SqlCommand("pr_LoadNagrTeacher", connSql))
             {
                 command.CommandType = CommandType.StoredProcedure;
                 command.Parameters.AddWithValue("@IDP", idPrepod);

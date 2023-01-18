@@ -134,6 +134,8 @@
     </Content>
     <Content Include="ExRasp_ico.ico" />
     <Content Include="Notes\Записки.txt" />
+    <Content Include="SQL\Procedure.txt" />
+    <Content Include="SQL\View.txt" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">

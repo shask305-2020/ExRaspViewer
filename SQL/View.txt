@@ -1,0 +1,11 @@
+﻿CREATE   VIEW [dbo].[ListOfGroups]
+	AS SELECT top 100 [IDG], [NAIM] FROM [dbo].[SPGRUP] ORDER BY [NAIM]
+
+
+CREATE   VIEW [dbo].[ListOfTeachers]
+	AS SELECT top 100 [IDP], [FAMIO] FROM [SPPREP] WHERE
+	([FAMIO] NOT LIKE (N'Ком%'))
+	AND ([FAMIO] NOT LIKE (N'Предприятие%'))
+	AND ([FAMIO] NOT LIKE (N'Вак%'))
+	AND ([FAMIO] NOT LIKE (N'Сам%'))
+	ORDER BY [FAMIO];

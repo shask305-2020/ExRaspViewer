@@ -87,5 +87,15 @@ namespace ExRaspViewer.Classes
             }
             return result;
         }
+
+        //Определение текущего семестра
+        public static int Semestr()
+        {
+            DateTime date = DateTime.Now;
+            if (date.Month > 0 && date.Month < 7)
+                return 2;
+            else
+                return 1;
+        }
     }
 }

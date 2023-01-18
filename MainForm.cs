@@ -1,14 +1,10 @@
-﻿using System;
+﻿using ExRaspViewer.Classes;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Data.OleDb;
 using System.Data.SqlClient;
-using ExRaspViewer.Classes;
+using System.Drawing;
+using System.Windows.Forms;
 
 
 namespace ExRaspViewer
@@ -27,10 +23,10 @@ namespace ExRaspViewer
         private DataSet dsGroup;
         private DataSet dsPrep;
 
-        private int semestr;    //Семестр
+        private int _semestr;    //Семестр
         private int tekNed = 4; //Текущая неделя
-        private int state = 0;  //если 0, то данные сохранены, 1 - данные еще не сохранены
-        private int _information = 0;
+        private bool is_edit = false;   //если false, то данные сохранены, true - данные еще не сохранены
+        private int _tableHeight = 0;
         private bool _listGroupClick = false;
 
         public MainForm()
@@ -46,47 +42,15 @@ namespace ExRaspViewer
             AddColumnPlan();
             LoadDataPlanGroup();
             LoadDataPlanPrep();
-            FirstLoadData();
-        }
-
-        private void FirstLoadData()
-        {
             lbDay.Text = dateTimePicker1.Value.ToString("ddd"); //День недели
-            semestr = Semestr();    //Определение текущего семестра
-            servicesList = service.GetListNedely(semestr);
-            tekNed = Nedelya() + 3;
+            _semestr = Service.Semestr();    //Определение текущего семестра
+            servicesList = service.GetListNedely(_semestr);
+            tekNed = Nedelya() + 3;     //+3 стоит потому, что первые три столбца для идентификаторов групп, преподавателей и предметов
             labelNumNed.Text = Convert.ToString(tekNed - 3);
         }
 
-        //Определение текущего семестра
-        private int Semestr()
-        {
-            DateTime date = DateTime.Now;
-            if (date.Month >= 1 && date.Month <= 6)
-                return 2;
-            else
-                return 1;
-        }
 
-        //Обновить таблицу с расписанием (из файла БД программы Экспресс-расписание Колледж)
-        private void открытьБДToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            string connection = oleDB.OpenFileDB();
-            if (connection == "error")
-                return;
-            data.DeleteDataFromDB();            //Удаление данных из рабочей БД
-            data.UpdateSqlTable(connection);    //Обновление данных в таблицах рабочей БД
-            data.SyncPlan();                    //Синронизация данных в таблице плана
-            LoadGroup();
-            LoadPrepod();
-        }
-        
-        //Выход из приложения
-        private void выходToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Application.Exit();
-        }
-
+        #region Загрузка списков групп и преподавателей
         //Загрузка списка групп в ListBox
         private void LoadGroup()
         {
@@ -102,9 +66,11 @@ namespace ExRaspViewer
             listBox2.ValueMember = "IDP";
             listBox2.DataSource = SqlDB.LoadTable("ListOfTeachers");
         }
+        #endregion
 
+
+        #region Загрузка данных по нагрузке групп и преподавателей
         //Загрузка данных по нагрузке групп в DataGridView
-        //Нужно добавить столбец и строку с суммами (еще не реализовано)
         private void LoadDataNagruzkaGrupp()
         {
             int id = (int)listBox1.SelectedValue;
@@ -127,7 +93,6 @@ namespace ExRaspViewer
             dataGridView1.Columns[8].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             dataGridView1.Columns[8].Width = 50;
             dataGridView1.Columns[9].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            //CurrentHoursGroup();
 
             //Отключение пользовательской сортировки
             for (int i = 0; i < dataGridView1.ColumnCount; i++)
@@ -137,7 +102,6 @@ namespace ExRaspViewer
         }
 
         //Загрузка нагрузки преподавателей
-        //Нужно добавить строку с суммами (не реализовано)
         private void LoadDataNagrPrepod()
         {
             int id = (int)listBox2.SelectedValue;
@@ -160,7 +124,6 @@ namespace ExRaspViewer
             dataGridView2.Columns[8].AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
             dataGridView2.Columns[8].Width = 50;
             dataGridView2.Columns[9].AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill;
-            //CurrentHoursPrepod();
 
             //Отключение пользовательской сортировки
             for (int i = 0; i < dataGridView2.ColumnCount; i++)
@@ -168,11 +131,14 @@ namespace ExRaspViewer
                 dataGridView2.Columns[i].SortMode = DataGridViewColumnSortMode.Programmatic;
             }
         }
+        #endregion
 
+
+        #region Обновление таблиц с нагрузкой групп и преподавателей
         //Обновление таблицы с нагрузкой групп
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (state == 1)
+            if (is_edit)
                 UpdateTablePlanGroup();
             LoadDataNagruzkaGrupp();
             LoadDataPlanGroup();
@@ -181,31 +147,150 @@ namespace ExRaspViewer
         //Обновление таблицы с нагрузкой преподавателей
         private void listBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (state == 1)
+            if (is_edit)
                 UpdateTablePlanPrepod();
             LoadDataNagrPrepod();
             LoadDataPlanPrep();
         }
+        #endregion
 
-        
-        //Отображние данных по пройденным урокам и остатку (для преподавателей)
-        private void CurrentHoursPrepod()
+
+        #region Работа с планом
+
+        //Загрузка данных по плану в DGV (для групп)
+        private void LoadDataPlanGroup()
         {
-            int idg, idp, idd, num, vsego;
-            string dat = dateTimePicker1.Value.ToString("d");
-            int countDGV = dataGridView2.Rows.Count;
-            for (int i = 0; i < countDGV; i++)
+            adapterGroup = new SqlDataAdapter();
+            builderGroup = new SqlCommandBuilder();
+            dsGroup = new DataSet();
+            int idg = Convert.ToInt32(listBox1.SelectedValue);
+            dataGridView3.AutoGenerateColumns = false;
+            SqlCommand cmd = new SqlCommand("SELECT * FROM [PLAN] WHERE IDG = @IDG ORDER BY [IDP], [IDD]", data.ConnSql);
+            cmd.CommandType = CommandType.Text;
+            cmd.Parameters.Add("@IDG", SqlDbType.Int);
+            cmd.Parameters["@IDG"].Value = idg;
+            adapterGroup.SelectCommand = cmd;   //Выбор даных из таблицы плана (с фильтром)
+            builderGroup.DataAdapter = adapterGroup;
+            adapterGroup.Fill(dsGroup);
+            dataGridView3.DataSource = dsGroup.Tables[0];
+
+            //Отключение пользовательской сортировки
+            for (int i = 0; i < dataGridView3.ColumnCount; i++)
             {
-                idp = (int)dataGridView2[0, i].Value;
-                idg = (int)dataGridView2[1, i].Value;
-                idd = (int)dataGridView2[2, i].Value;
-                num = data.CountUroki(idp, idg, idd, dat);
-                vsego = Convert.ToInt32(dataGridView2[6, i].Value);
-                dataGridView2[7, i].Value = num;            //Выполнено
-                dataGridView2[8, i].Value = vsego - num;    //Остаток
+                dataGridView3.Columns[i].SortMode = DataGridViewColumnSortMode.Programmatic;
+            }
+
+            //Скрытие столбцов
+            if (dataGridView3.ColumnCount > 0)
+            {
+                dataGridView3.Columns["IDN"].Visible = false;
+                dataGridView3.Columns["IDG"].Visible = false;
+                dataGridView3.Columns["IDP"].Visible = false;
+                dataGridView3.Columns["IDD"].Visible = false;
+            }
+
+            SummRowPlanGroup(); //Сумма по строкам
+            SummColumnPlanLoadGroup();
+            ColumnPlanWidthGroup(); //Установка ширины столбцов
+
+            //Автовысота таблицы
+            if (_listGroupClick)
+            {
+                _tableHeight = 20 * dataGridView3.RowCount + 50;
+                splitContainer1.SplitterDistance = _tableHeight;
+                _listGroupClick = false;
             }
         }
 
+        //Загрузка данных по плану в DGV (для преподавателей)
+        private void LoadDataPlanPrep()
+        {
+            adapterPrep = new SqlDataAdapter();
+            builderPrep = new SqlCommandBuilder();
+            dsPrep = new DataSet();
+            int idp = Convert.ToInt32(listBox2.SelectedValue);
+            dataGridView4.AutoGenerateColumns = false;
+            SqlCommand cmd = new SqlCommand("SELECT * FROM [PLAN] WHERE IDP = @IDP ORDER BY [IDG], [IDD]", data.ConnSql);
+            cmd.CommandType = CommandType.Text;
+            cmd.Parameters.Add("@IDP", SqlDbType.Int);
+            cmd.Parameters["@IDP"].Value = idp;
+            adapterPrep.SelectCommand = cmd;    //Выбор даных из таблицы плана (с фильтром)
+            builderPrep.DataAdapter = adapterPrep;
+            adapterPrep.Fill(dsPrep);
+            dataGridView4.DataSource = dsPrep.Tables[0];
+
+            //Отключение пользовательской сортировки
+            for (int i = 0; i < dataGridView4.ColumnCount; i++)
+            {
+                dataGridView4.Columns[i].SortMode = DataGridViewColumnSortMode.Programmatic;
+            }
+
+            //Скрытие столбцов
+            if (dataGridView4.ColumnCount > 0)
+            {
+                dataGridView4.Columns["IDN"].Visible = false;
+                dataGridView4.Columns["IDG"].Visible = false;
+                dataGridView4.Columns["IDP"].Visible = false;
+                dataGridView4.Columns["IDD"].Visible = false;
+            }
+            SummRowPlanPrep();  //Сумма по строкам
+            SummColumnPlanLoadPrep();
+            ColumnPlanWidthPrep();  //Установка ширины столбцов
+        }
+
+        //Задание ширины столбцов в таблице плана у групп
+        private void ColumnPlanWidthGroup()
+        {
+            int colCount = dataGridView3.Columns.Count;
+            for (int i = 0; i < colCount; i++)
+                dataGridView3.Columns[i].Width = 40;
+        }
+
+        //Задание ширины столбцов в таблице плана у преподавателей
+        private void ColumnPlanWidthPrep()
+        {
+            int colCount = dataGridView4.Columns.Count;
+            for (int i = 0; i < colCount; i++)
+                dataGridView4.Columns[i].Width = 40;
+        }
+
+        //Сохранение таблицы плана в БД (для групп)
+        private void UpdateTablePlanGroup()
+        {
+            builderGroup.GetUpdateCommand();
+            adapterGroup.Update(dsGroup.Tables[0]);
+        }
+
+        //Сохранение таблицы плана в БД (для преподавателей)
+        private void UpdateTablePlanPrepod()
+        {
+            builderPrep.GetUpdateCommand();
+            adapterPrep.Update(dsPrep.Tables[0]);
+        }
+
+        //Обновление данных в БД (для групп)
+        private void dataGridView3_Leave(object sender, EventArgs e)
+        {
+            dataGridView3.EndEdit();
+            UpdateTablePlanGroup();
+            LoadDataPlanPrep();
+
+            is_edit = false;
+        }
+
+        //Обновление данных в БД (для преподавателей)
+        private void dataGridView4_Leave(object sender, EventArgs e)
+        {
+            dataGridView4.EndEdit();
+            UpdateTablePlanPrepod();
+            LoadDataPlanGroup();
+
+            is_edit = false;
+        }
+        #endregion
+
+
+        #region Сервисные функции
         //Изменение даты
         private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
         {
@@ -218,11 +303,9 @@ namespace ExRaspViewer
 
             LoadDataNagrPrepod();
             SummRowPlanPrep();
-            //CurrentHoursGroup();
-            //CurrentHoursPrepod();
         }
 
-        //Вычисление номера недели
+        //Вычисление номера недели (нужно перебросить в класс Service)
         private int Nedelya()
         {
             DateTime date = dateTimePicker1.Value.Date;
@@ -270,149 +353,27 @@ namespace ExRaspViewer
             }
         }
 
-        //Загрузка данных по плану в DGV (для групп)
-        private void LoadDataPlanGroup()
+        //Заполнение таблицы с наименованиями недель для плана (1 или 2 семестр)
+        private void SetWeek(int semestr)
         {
-            adapterGroup = new SqlDataAdapter();
-            builderGroup = new SqlCommandBuilder();
-            dsGroup = new DataSet();
-            int idg = Convert.ToInt32(listBox1.SelectedValue);
-            dataGridView3.AutoGenerateColumns = false;
-            SqlCommand cmd = new SqlCommand("SELECT * FROM [PLAN] WHERE IDG = @IDG ORDER BY [IDP], [IDD]", data.ConnSql);
-            cmd.CommandType = CommandType.Text;
-            cmd.Parameters.Add("@IDG", SqlDbType.Int);
-            cmd.Parameters["@IDG"].Value = idg;
-            adapterGroup.SelectCommand = cmd;   //Выбор даных из таблицы плана (с фильтром)
-            builderGroup.DataAdapter = adapterGroup;
-            adapterGroup.Fill(dsGroup);
-            dataGridView3.DataSource = dsGroup.Tables[0];
-
-            //Отключение пользовательской сортировки
-            for (int i = 0; i < dataGridView3.ColumnCount; i++)
-            {
-                dataGridView3.Columns[i].SortMode = DataGridViewColumnSortMode.Programmatic;
-            }
-
-            //Скрытие столбцов
-            if (dataGridView3.ColumnCount > 0)
-            {
-                dataGridView3.Columns["IDN"].Visible = false;
-                dataGridView3.Columns["IDG"].Visible = false;
-                dataGridView3.Columns["IDP"].Visible = false;
-                dataGridView3.Columns["IDD"].Visible = false;
-            }
-            
-            SummRowPlanGroup(); //Сумма по строкам
-            SummColumnPlanLoadGroup();
-            ColumnPlanWidthGroup(); //Установка ширины столбцов
-
-            //Автовысота таблицы
-            if (_listGroupClick)
-            {
-                _information = 20 * dataGridView3.RowCount + 50;
-                splitContainer1.SplitterDistance = _information;
-                _listGroupClick = false;
-            }
-        }
-
-        //Загрузка данных по плану в DGV (для преподавателей)
-        private void LoadDataPlanPrep()
-        {
-            adapterPrep = new SqlDataAdapter();
-            builderPrep = new SqlCommandBuilder();
-            dsPrep = new DataSet();
-            int idp = Convert.ToInt32(listBox2.SelectedValue);
-            dataGridView4.AutoGenerateColumns = false;
-            SqlCommand cmd = new SqlCommand("SELECT * FROM [PLAN] WHERE IDP = @IDP ORDER BY [IDG], [IDD]", data.ConnSql);
-            cmd.CommandType = CommandType.Text;
-            cmd.Parameters.Add("@IDP", SqlDbType.Int);
-            cmd.Parameters["@IDP"].Value = idp;
-            adapterPrep.SelectCommand = cmd;    //Выбор даных из таблицы плана (с фильтром)
-            builderPrep.DataAdapter = adapterPrep;
-            adapterPrep.Fill(dsPrep);
-            dataGridView4.DataSource = dsPrep.Tables[0];
-            
-            //Отключение пользовательской сортировки
-            for (int i = 0; i < dataGridView4.ColumnCount; i++)
-            {
-                dataGridView4.Columns[i].SortMode = DataGridViewColumnSortMode.Programmatic;
-            }
-
-            //Скрытие столбцов
-            if (dataGridView4.ColumnCount > 0)
-            {
-                dataGridView4.Columns["IDN"].Visible = false;
-                dataGridView4.Columns["IDG"].Visible = false;
-                dataGridView4.Columns["IDP"].Visible = false;
-                dataGridView4.Columns["IDD"].Visible = false;
-            }
-            SummRowPlanPrep();  //Сумма по строкам
-            SummColumnPlanLoadPrep();
-            ColumnPlanWidthPrep();  //Установка ширины столбцов
-        }
-
-        //Задание ширины столбцов в таблице плана у групп
-        private void ColumnPlanWidthGroup()
-        {
-            int colCount = dataGridView3.Columns.Count;
-            for (int i = 0; i < colCount; i++)
-            {
-                dataGridView3.Columns[i].Width = 40;
-            }
-        }
-
-        //Задание ширины столбцов в таблице плана у преподавателей
-        private void ColumnPlanWidthPrep()
-        {
-            int colCount = dataGridView4.Columns.Count;
-            for (int i = 0; i < colCount; i++)
-            {
-                dataGridView4.Columns[i].Width = 40;
-            }
-        }
-
-        //Сохранение таблицы плана в БД (для групп)
-        private void UpdateTablePlanGroup()
-        {
-            builderGroup.GetUpdateCommand();
-            adapterGroup.Update(dsGroup.Tables[0]);
-        }
-
-        //Сохранение таблицы плана в БД (для преподавателей)
-        private void UpdateTablePlanPrepod()
-        {
-            builderPrep.GetUpdateCommand();
-            adapterPrep.Update(dsPrep.Tables[0]);
-        }
-
-        //Обновление данных в БД (для групп)
-        private void dataGridView3_Leave(object sender, EventArgs e)
-        {
-            dataGridView3.EndEdit();
-            UpdateTablePlanGroup();
-            LoadDataPlanPrep();
-            lbStatus.Text = "Данные сохранены";
-            lbStatus.ForeColor = Color.Green;
-            state = 0;
-
-        }
-
-        //Обновление данных в БД (для преподавателей)
-        private void dataGridView4_Leave(object sender, EventArgs e)
-        {
-            dataGridView4.EndEdit();
-            UpdateTablePlanPrepod();
+            data.DeleteDataFromDB("NED");
+            data.LoadNed(semestr);
+            dataGridView3.Columns.Clear();
+            dataGridView4.Columns.Clear();
+            AddColumnPlan();
             LoadDataPlanGroup();
-            lbStatus.Text = "Данные сохранены";
-            lbStatus.ForeColor = Color.Green;
-            state = 0;
+            LoadDataPlanPrep();
+            _semestr = semestr;
         }
+        #endregion
 
+
+        #region Смена строк в планах и нагрузке
         //Смена строки в нагрузке групп
         private void dataGridView1_SelectionChanged(object sender, EventArgs e)
         {
             int rowIndex = dataGridView1.CurrentCell.RowIndex;
-            if (dataGridView1.Focused && rowIndex != -1 && rowIndex != dataGridView3.RowCount)
+            if (dataGridView1.Focused)
                 dataGridView3.Rows[rowIndex].Cells[tekNed].Selected = true;
         }
 
@@ -420,7 +381,7 @@ namespace ExRaspViewer
         private void dataGridView2_SelectionChanged(object sender, EventArgs e)
         {
             int rowIndex = dataGridView2.CurrentCell.RowIndex;
-            if (dataGridView2.Focused && rowIndex != -1 && rowIndex != dataGridView4.RowCount)
+            if (dataGridView2.Focused)
                 dataGridView4.Rows[rowIndex].Cells[tekNed].Selected = true;
         }
 
@@ -428,26 +389,27 @@ namespace ExRaspViewer
         private void dataGridView3_SelectionChanged(object sender, EventArgs e)
         {
             int rowIndex = dataGridView3.CurrentCell.RowIndex;
-            if (dataGridView3.Focused && rowIndex != -1 && rowIndex != dataGridView3.RowCount - 1)
-                if (dataGridView1.Rows.Count !=0)
-                    dataGridView1.Rows[rowIndex].Selected = true;
+            int dgv1RowsCount = dataGridView1.Rows.Count;
+            if (dataGridView3.Focused && rowIndex < dgv1RowsCount)
+                dataGridView1.Rows[rowIndex].Selected = true;
         }
 
         //Смена строки в плане преподавателей
         private void dataGridView4_SelectionChanged(object sender, EventArgs e)
         {
             int rowIndex = dataGridView4.CurrentCell.RowIndex;
-            if (dataGridView4.Focused && rowIndex != -1 && rowIndex != dataGridView4.RowCount - 1)
-                if (dataGridView2.Rows.Count != 0)
-                    dataGridView2.Rows[rowIndex].Selected = true;
+            int dgv2RowsCount = dataGridView2.Rows.Count;
+            if (dataGridView4.Focused && rowIndex < dgv2RowsCount)
+                dataGridView2.Rows[rowIndex].Selected = true;
         }
+        #endregion
 
+
+        #region Суммирование значений в столбце (план)
         //Подсчет элементов в столбце (план групп)
         private void dataGridView3_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
             dataGridView3.BindingContext[dataGridView3.DataSource].EndCurrentEdit();    //Завершение редактирования текущей ячейки
-            lbStatus.Text = "Ячейка не редактируется";
-            lbStatus.ForeColor = Color.Black;
             SummPlanGroupColumn();
         }
 
@@ -455,11 +417,12 @@ namespace ExRaspViewer
         private void dataGridView4_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
             dataGridView4.BindingContext[dataGridView4.DataSource].EndCurrentEdit();    //Завершение редактирования текущей ячейки
-            lbStatus.Text = "Ячейка не редактируется";
-            lbStatus.ForeColor = Color.Black;
             SummPlanPrepColumn();
         }
+        #endregion
 
+
+        #region Суммирование значений в строке (нагрузка)
         //Суммирование значений в строке (нагрузка у групп)
         private void SummRowPlanGroup()
         {
@@ -511,7 +474,10 @@ namespace ExRaspViewer
                 summUr = 0;
             }
         }
+        #endregion
 
+
+        #region Сумма по столбцам в плане (для групп и преподавателей при загрузке плана)
         //Сумма по столбцам в плане (для групп при загрузке плана)
         private void SummColumnPlanLoadGroup()
         {
@@ -541,7 +507,39 @@ namespace ExRaspViewer
             }
         }
 
-        //Форматирование ячеек в соответствии с правилами
+        //Сумма по столбцам в плане (для преподавателей при загрузке плана)
+        private void SummColumnPlanLoadPrep()
+        {
+            int rowsCount = dataGridView4.Rows.Count - 1;    //Количество строк (без последней строки)
+            int columnCount = dataGridView4.Columns.Count;
+            int summUr = 0;
+            for (int i = 4; i < columnCount; i++)
+            {
+                for (int j = 0; j < rowsCount; j++)
+                {
+                    object item = dataGridView4.Rows[j].Cells[i].Value;
+                    int podGruppa = Convert.ToInt32(dataGridView2.Rows[j].Cells[5].Value);
+                    if (item != DBNull.Value && item != null)
+                    {
+                        string a = item.ToString();
+                        if (service.StringIsDigit(a))
+                        { summUr += Convert.ToInt32(item); }
+                        else
+                        {
+                            SetColorCellPlan(a, 4, j, i);   //Форматирование ячеек
+                        }
+                    }
+                }
+                dataGridView4.Rows[rowsCount].Cells[i].Value = summUr; //Отображение суммы столбца
+                SetColorRowSumm(4, summUr, rowsCount, i);
+                summUr = 0;
+            }
+        }
+        #endregion
+
+
+        #region Форматирование ячеек
+        //Форматирование ячеек в соответствии с правилами (У, П и ПП)
         private void SetColorCellPlan(string cell, int dgv, int rowIndex, int columnIndex)
         {
             switch (dgv)
@@ -576,36 +574,7 @@ namespace ExRaspViewer
             }
         }
 
-        //Сумма по столбцам в плане (для преподавателей при загрузке плана)
-        private void SummColumnPlanLoadPrep()
-        {
-            int rowsCount = dataGridView4.Rows.Count - 1;    //Количество строк (без последней строки)
-            int columnCount = dataGridView4.Columns.Count;
-            int summUr = 0;
-            for (int i = 4; i < columnCount; i++)
-            {
-                for (int j = 0; j < rowsCount; j++)
-                {
-                    object item = dataGridView4.Rows[j].Cells[i].Value;
-                    int podGruppa = Convert.ToInt32(dataGridView2.Rows[j].Cells[5].Value);
-                    if (item != DBNull.Value && item != null)
-                    {
-                        string a = item.ToString();
-                        if (service.StringIsDigit(a))
-                        { summUr += Convert.ToInt32(item); }
-                        else
-                        {
-                            SetColorCellPlan(a, 4, j, i);   //Форматирование ячеек
-                        }
-                    }
-                }
-                dataGridView4.Rows[rowsCount].Cells[i].Value = summUr; //Отображение суммы столбца
-                SetColorRowSumm(4, summUr, rowsCount, i);
-                summUr = 0;
-            }
-        }
-
-        //Форматирование ячеек при превышении нагрузки
+        //Форматирование ячеек при превышении нагрузки (36 часов в неделю)
         private void SetColorRowSumm(int dgv, int summUr, int rowsIndex, int columnIndex)
         {
             if (summUr <= 36 && dgv == 3)
@@ -631,7 +600,35 @@ namespace ExRaspViewer
             }
         }
 
-        //Подсчет количества уроков в плане группы (по одному столбцу)
+        //Кнопки для выделения цветом ячеек
+        private void button1_Click(object sender, EventArgs e)
+        {
+            dataGridView3.CurrentCell.Style.BackColor = Color.PaleGreen;
+            dataGridView3.Focus();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            dataGridView3.CurrentCell.Style.BackColor = Color.White;
+            dataGridView3.Focus();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            dataGridView4.CurrentCell.Style.BackColor = Color.PaleGreen;
+            dataGridView4.Focus();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            dataGridView4.CurrentCell.Style.BackColor = Color.White;
+            dataGridView4.Focus();
+        }
+        #endregion
+
+
+        #region Подсчет количества уроков в плане групп и преподавателей (по столбцам)
+        //Подсчет количества уроков в плане группы (по столбцам)
         private void SummPlanGroupColumn()
         {
             int columnIndex = dataGridView3.CurrentCell.ColumnIndex;  //Индекс текущего столбца
@@ -666,7 +663,6 @@ namespace ExRaspViewer
             for (int i = 0; i < rowsCount; i++)
             {
                 object yacheyka = dataGridView4.Rows[i].Cells[columnIndex].Value;
-                int podGruppa = Convert.ToInt32(dataGridView2.Rows[i].Cells[5].Value);
                 if (yacheyka != DBNull.Value)
                 {
                     string a = yacheyka.ToString();
@@ -684,7 +680,10 @@ namespace ExRaspViewer
             SetColorRowSumm(4, summUr, rowsCount, columnIndex);
             SummRowPlanPrep();
         }
+        #endregion
 
+
+        #region KeyDown (Delete)
         //Удаление значения текущей ячейки
         private void dataGridView3_KeyDown(object sender, KeyEventArgs e)
         {
@@ -693,7 +692,6 @@ namespace ExRaspViewer
                 dataGridView3.CurrentCell.Value = null;
                 dataGridView3.BindingContext[dataGridView3.DataSource].EndCurrentEdit();
                 SummPlanGroupColumn();
-                state = 1;
             }
         }
 
@@ -705,140 +703,117 @@ namespace ExRaspViewer
                 dataGridView4.CurrentCell.Value = null;
                 dataGridView4.BindingContext[dataGridView4.DataSource].EndCurrentEdit();
                 SummPlanPrepColumn();
-                state = 1;
             }
         }
+        #endregion
 
+
+        #region Enter
         private void dataGridView3_Enter(object sender, EventArgs e)
         {
-            lbStatus.Text = "Данные изменены";
-            lbStatus.ForeColor = Color.Red;
-            state = 1;
+            //Данные изменены
+            is_edit = true;
         }
 
         private void dataGridView4_Enter(object sender, EventArgs e)
         {
-            lbStatus.Text = "Данные изменены";
-            lbStatus.ForeColor = Color.Red;
-            state = 1;
+            //Данные изменены
+            is_edit = true;
         }
+        #endregion
 
-        private void dataGridView3_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
-        {
-            lbStatus.Text = "Ячейка редактируется";
-            lbStatus.ForeColor = Color.DarkGoldenrod;
-        }
 
-        private void dataGridView4_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
-        {
-            lbStatus.Text = "Ячейка редактируется";
-            lbStatus.ForeColor = Color.DarkGoldenrod;
-        }
-
-        //Заполнение таблицы с наименованием недель (1 семестр)
-        private void заполнитьНеделиДля1СемToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            data.DeleteDataFromDB("NED");
-            data.LoadNed(1);
-            dataGridView3.Columns.Clear();
-            dataGridView4.Columns.Clear();
-            AddColumnPlan();
-            LoadDataPlanGroup();
-            LoadDataPlanPrep();
-            semestr = 1;
-        }
-
-        //Заполнение таблицы с наименованием недель (2 семестр)
-        private void заполнитьНеделиДля2СемToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            data.DeleteDataFromDB("NED");
-            data.LoadNed(2);
-            dataGridView3.Columns.Clear();
-            dataGridView4.Columns.Clear();
-            AddColumnPlan();
-            LoadDataPlanGroup();
-            LoadDataPlanPrep();
-            semestr = 2;
-        }
-
-        //Кнопки для выделения цветом ячеек
-        private void button1_Click(object sender, EventArgs e)
-        {
-            dataGridView3.CurrentCell.Style.BackColor = Color.PaleGreen;
-            dataGridView3.Focus();
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            dataGridView3.CurrentCell.Style.BackColor = Color.White;
-            dataGridView3.Focus();
-        }
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-            dataGridView4.CurrentCell.Style.BackColor = Color.PaleGreen;
-            dataGridView4.Focus();
-        }
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-            dataGridView4.CurrentCell.Style.BackColor = Color.White;
-            dataGridView4.Focus();
-        }
-
-        private void отчётЗаМесяцToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            Otchet form = new Otchet();
-            form.ShowDialog();
-        }
-
-        private void оПрограммеToolStripMenuItem1_Click(object sender, EventArgs e)
-        {
-            About form = new About();
-            form.ShowDialog();
-        }
-
-        private void listBox2_Click(object sender, EventArgs e)
-        {
-            //Автовысота таблицы
-            splitContainer1.SplitterDistance = 80;
-            dataGridView4.Focus();
-        }
-
+        #region Управление фокусом и размер сплит контейнера
         private void listBox1_Click(object sender, EventArgs e)
         {
             _listGroupClick = true;
             dataGridView3.Focus();
         }
 
+        private void listBox2_Click(object sender, EventArgs e)
+        {
+            //Автовысота таблицы
+            splitContainer1.SplitterDistance = 150;
+            dataGridView4.Focus();
+        }
+
         private void dataGridView1_Click(object sender, EventArgs e)
         {
             dataGridView3.Focus();
-            if (_information == 0)
+            
+            if (_tableHeight == 0)
             {
-                _information = 20 * dataGridView3.RowCount + 50;
+                _tableHeight = 20 * dataGridView3.RowCount + 70;
             }
-            splitContainer1.SplitterDistance = _information;
+            splitContainer1.SplitterDistance = _tableHeight;
         }
 
         private void dataGridView2_Click(object sender, EventArgs e)
         {
             dataGridView4.Focus();
-            splitContainer1.SplitterDistance = 80;
+            splitContainer1.SplitterDistance = 150;
         }
 
         private void dataGridView3_Click(object sender, EventArgs e)
         {
-            if (_information == 0)
+            if (_tableHeight == 0)
             {
-                _information = 20 * dataGridView3.RowCount + 50;
+                _tableHeight = 20 * dataGridView3.RowCount + 70;
             }
-            splitContainer1.SplitterDistance = _information;
+            splitContainer1.SplitterDistance = _tableHeight;
         }
 
         private void dataGridView4_Click(object sender, EventArgs e)
         {
-            splitContainer1.SplitterDistance = 80;
+            splitContainer1.SplitterDistance = 150;
         }
+        #endregion
+
+
+        #region Menu
+        //Обновить таблицу с расписанием (из файла БД программы Экспресс-расписание Колледж)
+        private void menuOpenDB_Click(object sender, EventArgs e)
+        {
+            string connection = oleDB.OpenFileDB();
+            if (connection == "error")
+                return;
+            data.DeleteDataFromDB();            //Удаление данных из рабочей БД
+            data.UpdateSqlTable(connection);    //Обновление данных в таблицах рабочей БД
+            data.SyncPlan();                    //Синронизация данных в таблице плана
+            LoadGroup();
+            LoadPrepod();
+        }
+
+        //Заполнение таблицы с наименованием недель (1 и 2 семестры)
+        private void menuFill_1term_Click(object sender, EventArgs e)
+        {
+            SetWeek(1);
+        }
+        private void menuFill_2term_Click(object sender, EventArgs e)
+        {
+            SetWeek(2);
+        }
+
+        //Меню для открытия окна отчета за месяц
+        private void menuMonthlyReport_Click(object sender, EventArgs e)
+        {
+            Otchet form = new Otchet();
+            form.ShowDialog();
+        }
+
+        //Меню информации о программе
+        private void menuAbout_Click(object sender, EventArgs e)
+        {
+            About form = new About();
+            form.ShowDialog();
+        }
+
+        //Выход из приложения
+        private void menuExit_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        #endregion
     }
 }
